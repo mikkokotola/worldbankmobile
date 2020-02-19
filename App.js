@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
-import { Charts, ChartContainer, ChartRow, YAxis, LineChart } from "react-timeseries-charts";
+import Plotly from 'react-native-plotly';
 
 export default class CountryList extends Component {
   constructor(props) {
@@ -9,7 +9,7 @@ export default class CountryList extends Component {
       isLoading: true,
       dataSource: null,
       country: null,
-      labels: null,
+      countryLabels: null,
       countryTimeSeries: null
     }
   }
@@ -80,13 +80,22 @@ export default class CountryList extends Component {
     }
 
     else {
+      console.log('Labels');
+      console.log(this.state.countryLabels);
+      const data = [{
+        x: this.state.countryLabels,
+        y: this.state.countryTimeSeries,
+        type: 'bar',
+      }];
+      const layout = { title: 'My cool chart!' };
+    
       return (
-        <View style={{ flex: 1, paddingTop: 20 }}>
-          <Text>Got country data {this.state.countryTimeSeries[0]}</Text>
-        </View>
-      );
+        <Plotly
+          data={data}
+          layout={layout}
+        />
+      )
     }
-
   }
 
   actionOnRow(item) {
@@ -104,7 +113,7 @@ export default class CountryList extends Component {
     console.log('Rendering Chart with data ' + countryTimeSeries[0] + '... and labels ' + labels[0] + '...')
     this.setState({
       isLoading: false,
-      labels: labels,
+      countryLabels: labels,
       countryTimeSeries: countryTimeSeries
     }, function () { });
   }

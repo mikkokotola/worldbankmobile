@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import Plotly from 'react-native-plotly';
+
+// World bank API, fetch 400 per page, meaning that we get the whole country list
+const countryListUrl = 'https://api.worldbank.org/v2/country?format=json&per_page=400';
+const countryBaseUrl = 'https://api.worldbank.org/v2/country/';
+// Population time series indicator (World Bank API)
+const indicator = 'SP.POP.TOTL';
 
 export default class CountryList extends Component {
   constructor(props) {
@@ -9,17 +15,15 @@ export default class CountryList extends Component {
       isLoading: true,
       dataSource: null,
       country: null,
+      countryName: null,
       countryLabels: null,
       countryTimeSeries: null
     }
   }
 
   async componentDidMount() {
-    // World bank API, fetch 400 per page, meaning that we get the whole country list
-    const url = 'https://api.worldbank.org/v2/country?format=json&per_page=400';
-
     try {
-      var response = await fetch(url);
+      var response = await fetch(countryListUrl);
 
       if (!response.ok) {
         throw Error(response.statusText);
@@ -30,6 +34,9 @@ export default class CountryList extends Component {
           var countryData = await response.json();
           var countryList = countryData[1].sort(sortCountriesAlphabeticallyByName);
 
+          // Skip aggregate areas such as "EU" and "EMU area"
+          countryList = countryList.filter((cntry) => cntry.capitalCity !== '');
+          
           this.setState({
             isLoading: false,
             dataSource: countryList,
@@ -47,9 +54,24 @@ export default class CountryList extends Component {
 
   render() {
 
-    if (this.state.isLoading) {
+    if (this.state.isLoading && this.state.dataSource == null) {
       return (
-        <View style={{ flex: 1, padding: 20 }}>
+        <View style={styles.container}>
+          <Text style={styles.waitingText}>Loading country list</Text>
+          <ActivityIndicator />
+        </View>
+      )
+    }
+
+    else if (this.state.isLoading) {
+      return (
+        <View style={styles.container}>
+          <Button
+            style={styles.selectCountryButton}
+            title="Select country"
+            disabled
+          />
+          <Text style={styles.waitingText}>Loading country data for: {this.state.countryName} </Text>
           <ActivityIndicator />
         </View>
       )
@@ -57,7 +79,12 @@ export default class CountryList extends Component {
 
     else if (this.state.country === null) {
       return (
-        <View style={{ flex: 1, paddingTop: 20 }}>
+        <View style={styles.container}>
+          <Button
+            style={styles.selectCountryButton}
+            title="Select country"
+            disabled
+          />
           <FlatList
             data={this.state.dataSource}
             renderItem={({ item }) => (
@@ -73,82 +100,105 @@ export default class CountryList extends Component {
 
     else if (this.state.countryTimeSeries === null) {
       return (
-        <View style={{ flex: 1, padding: 20 }}>
+        <View style={styles.container}>
+          <Button
+            style={styles.selectCountryButton}
+            title="Select country"
+            disabled
+          />
           <ActivityIndicator />
         </View>
       )
     }
 
     else {
-      console.log('Labels');
-      console.log(this.state.countryLabels);
       const data = [{
         x: this.state.countryLabels,
         y: this.state.countryTimeSeries,
         type: 'bar',
       }];
-      const layout = { title: 'My cool chart!' };
-    
+      const layout = { title: 'Population count / ' + this.state.countryName };
+
       return (
-        <Plotly
-          data={data}
-          layout={layout}
-        />
+        <View style={styles.container}>
+          <Button
+            style={styles.selectCountryButton}
+            title="Select country"
+            onPress={() => this.setState({
+              isLoading: false,
+              country: null,
+              countryName: null,
+              countryLabels: null,
+              countryTimeSeries: null
+            }, function () { })}
+          />
+          <Plotly
+            data={data}
+            layout={layout}
+          />
+        </View>
       )
     }
   }
 
   actionOnRow(item) {
-    const indicator = 'SP.POP.TOTL';
-    console.log('Selected Item :', item.id);
-    this.fetchDataAndRenderGraph(item.id, indicator);
+    this.fetchChartData(item.id, indicator);
     this.setState({
       isLoading: true,
       dataSource: this.state.dataSource,
-      country: item.id
+      country: item.id,
+      countryName: item.name
     }, function () { });
   }
 
   setChartData(countryTimeSeries, labels) {
-    console.log('Rendering Chart with data ' + countryTimeSeries[0] + '... and labels ' + labels[0] + '...')
     this.setState({
       isLoading: false,
       countryLabels: labels,
       countryTimeSeries: countryTimeSeries
     }, function () { });
   }
-  
-  async fetchDataAndRenderGraph(countryCode, indicatorCode) {
-    const baseUrl = 'https://api.worldbank.org/v2/country/'
-    const url = baseUrl + countryCode + '/indicator/' + indicatorCode + '?format=json'
-  
-    //clearChart();
-  
+
+  async fetchChartData(countryCode, indicatorCode) {
+    const countrySpecificUrl = countryBaseUrl + countryCode + '/indicator/' + indicatorCode + '?format=json'
+
     try {
-      var response = await fetch(url);
-  
+      var response = await fetch(countrySpecificUrl);
+
       if (!response.ok) {
         throw Error(response.statusText);
       }
       else {
         if (response.status == 200) {
           var fetchedData = await response.json();
-  
+
           if (fetchedData[0].message) {
             throw (fetchedData[0].message);
           }
-  
+
           var data = getValues(fetchedData);
           var labels = getLabels(fetchedData);
           this.setChartData(data, labels);
         } else {
           console.log('Fetching population data from server failed');
+          this.resetState();
         }
       }
     }
     catch (error) {
       console.log('Fetching population data from server failed');
-    };
+      this.resetState();
+    }
+  }
+
+  resetState() {
+    this.setState({
+      isLoading: false,
+      country: null,
+      countryName: null,
+      countryLabels: null,
+      countryTimeSeries: null
+    })
   }
 }
 
@@ -157,19 +207,6 @@ function sortCountriesAlphabeticallyByName(a, b) {
   if (a.name > b.name) { return 1; }
   return 0;
 }
-
-// Not being used yet. TODO: extract styles to StyleSheet.
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 22
-  },
-  item: {
-    padding: 5,
-    fontSize: 16,
-    height: 35,
-  },
-});
 
 function getValues(data) {
   var vals = data[1].sort((a, b) => a.date - b.date).map(item => item.value);
@@ -181,3 +218,23 @@ function getLabels(data) {
   return labels;
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20
+  },
+  waitingText: {
+    alignSelf: 'center',
+    fontSize: 16,
+    color: 'gray',
+    padding: 20
+  },
+  selectCountryButton: {
+    padding: 20
+  },
+  item: {
+    padding: 5,
+    fontSize: 16,
+    height: 35,
+  },
+});

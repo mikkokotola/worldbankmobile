@@ -115,7 +115,8 @@ export default class CountryList extends Component {
       const data = [{
         x: this.state.countryLabels,
         y: this.state.countryTimeSeries,
-        type: 'bar',
+        fill: 'tozeroy',
+        type: 'scatter',
       }];
       const layout = { title: 'Population count / ' + this.state.countryName };
 
@@ -135,6 +136,7 @@ export default class CountryList extends Component {
           <Plotly
             data={data}
             layout={layout}
+            config={{displayModeBar: false}}
           />
         </View>
       )
@@ -160,7 +162,7 @@ export default class CountryList extends Component {
   }
 
   async fetchChartData(countryCode, indicatorCode) {
-    const countrySpecificUrl = countryBaseUrl + countryCode + '/indicator/' + indicatorCode + '?format=json'
+    const countrySpecificUrl = countryBaseUrl + countryCode + '/indicator/' + indicatorCode + '?format=json&&per_page=60'
 
     try {
       var response = await fetch(countrySpecificUrl);

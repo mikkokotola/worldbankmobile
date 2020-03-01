@@ -8,7 +8,39 @@ const countryBaseUrl = 'https://api.worldbank.org/v2/country/';
 // Population time series indicator (World Bank API)
 const indicator = 'SP.POP.TOTL';
 
-export default class CountryList extends Component {
+export default class MainContainer extends Component {
+  render() {
+    return (
+      <View style={styles.mainContainer}>
+        <Header />
+        <CountryList />
+        <Footer />
+      </View>
+    );
+  }
+}
+
+class Header extends Component {
+  render() {
+    return (
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Population graphs</Text>
+      </View>
+    );
+  }
+}
+
+class Footer extends Component {
+  render() {
+    return (
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Population data: World Bank (CC BY 4.0)</Text>
+      </View>
+    );
+  }
+}
+
+class CountryList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -36,7 +68,7 @@ export default class CountryList extends Component {
 
           // Skip aggregate areas such as "EU" and "EMU area"
           countryList = countryList.filter((cntry) => cntry.capitalCity !== '');
-          
+
           this.setState({
             isLoading: false,
             dataSource: countryList,
@@ -136,7 +168,7 @@ export default class CountryList extends Component {
           <Plotly
             data={data}
             layout={layout}
-            config={{displayModeBar: false}}
+            config={{ displayModeBar: false }}
           />
         </View>
       )
@@ -221,11 +253,42 @@ function getLabels(data) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  mainContainer: {
+    flex: 1
+  },
+  header: {
+    flex: 3,
+    width: '100%',
+    backgroundColor: 'black',
+    textAlign: 'center'
+  },
+  headerText: {
+    fontFamily: 'sans-serif-condensed',
+    alignSelf: 'center',
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
     padding: 20
   },
+  footer: {
+    flex: 2,
+    width: '100%',
+    backgroundColor: 'black',
+    textAlign: 'center'
+  },
+  footerText: {
+    fontFamily: 'sans-serif-condensed',
+    alignSelf: 'center',
+    color: 'white',
+    padding: 5
+  },
+  container: {
+    flex: 30,
+    paddingLeft: 20,
+    paddingRight: 20
+  },
   waitingText: {
+    fontFamily: 'sans-serif-condensed',
     alignSelf: 'center',
     fontSize: 16,
     color: 'gray',
@@ -235,8 +298,9 @@ const styles = StyleSheet.create({
     padding: 20
   },
   item: {
-    padding: 5,
+    fontFamily: 'sans-serif-condensed',
+    padding: 3,
     fontSize: 16,
-    height: 35,
-  },
+    height: 25,
+  }
 });

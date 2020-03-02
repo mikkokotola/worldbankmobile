@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Button, FlatList, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Text, TouchableWithoutFeedback, View } from 'react-native';
 import Plotly from 'react-native-plotly';
+import styles from "./stylesheets/styles"
 
 // World bank API, fetch 400 per page, meaning that we get the whole country list
 const countryListUrl = 'https://api.worldbank.org/v2/country?format=json&per_page=400';
@@ -99,6 +100,7 @@ class CountryList extends Component {
       return (
         <View style={styles.container}>
           <Button
+            color='rgb(95, 21, 58)'
             style={styles.selectCountryButton}
             title="Select country"
             disabled
@@ -113,6 +115,7 @@ class CountryList extends Component {
       return (
         <View style={styles.container}>
           <Button
+            color='rgb(95, 21, 58)'
             style={styles.selectCountryButton}
             title="Select country"
             disabled
@@ -134,6 +137,7 @@ class CountryList extends Component {
       return (
         <View style={styles.container}>
           <Button
+            color='rgb(95, 21, 58)'
             style={styles.selectCountryButton}
             title="Select country"
             disabled
@@ -149,14 +153,18 @@ class CountryList extends Component {
         y: this.state.countryTimeSeries,
         fill: 'tozeroy',
         type: 'scatter',
+        line: {
+          color: 'rgb(95, 21, 58)'
+        },
+        fillcolor: 'rgba(95, 21, 58, 0.4)'
       }];
       const layout = { title: 'Population count / ' + this.state.countryName };
 
       return (
         <View style={styles.container}>
           <Button
-            style={styles.selectCountryButton}
-            title="Select country"
+            color='rgb(95, 21, 58)'
+            title='Select country'
             onPress={() => this.setState({
               isLoading: false,
               country: null,
@@ -251,56 +259,3 @@ function getLabels(data) {
   var labels = data[1].sort((a, b) => a.date - b.date).map(item => item.date);
   return labels;
 }
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1
-  },
-  header: {
-    flex: 3,
-    width: '100%',
-    backgroundColor: 'black',
-    textAlign: 'center'
-  },
-  headerText: {
-    fontFamily: 'sans-serif-condensed',
-    alignSelf: 'center',
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: 20
-  },
-  footer: {
-    flex: 2,
-    width: '100%',
-    backgroundColor: 'black',
-    textAlign: 'center'
-  },
-  footerText: {
-    fontFamily: 'sans-serif-condensed',
-    alignSelf: 'center',
-    color: 'white',
-    padding: 5
-  },
-  container: {
-    flex: 30,
-    paddingLeft: 20,
-    paddingRight: 20
-  },
-  waitingText: {
-    fontFamily: 'sans-serif-condensed',
-    alignSelf: 'center',
-    fontSize: 16,
-    color: 'gray',
-    padding: 20
-  },
-  selectCountryButton: {
-    padding: 20
-  },
-  item: {
-    fontFamily: 'sans-serif-condensed',
-    padding: 3,
-    fontSize: 16,
-    height: 25,
-  }
-});

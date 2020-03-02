@@ -1,8 +1,8 @@
 # World Bank data visualization on mobile
 World bank population data visualizer for mobile using React Native.
 
-![Sample population graph](./pics/Population_graphs_mobile_graph.jpg =400x)
-![Country list view](./pics/Population_graphs_mobile_countrylist.jpg =400x)
+![Sample population graph](./pics/Population_graphs_mobile_graph.jpg | width=400)
+![Country list view](./pics/Population_graphs_mobile_countrylist.jpg | width=400)
 
 ## Current status
 Fetching country list and population time series for a country from World Bank API works. Population time series visualized using react-native-plotly. Error handling/displaying not implemented (just logging them in console, except throwing if no country list can be fetched).

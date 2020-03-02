@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, Button, FlatList, Text, TouchableWithoutFeedback, View } from 'react-native';
 import Plotly from 'react-native-plotly';
-import styles from "./stylesheets/styles"
+import { styles, graphStyles } from "./stylesheets/styles"
 
 // World bank API, fetch 400 per page, meaning that we get the whole country list
 const countryListUrl = 'https://api.worldbank.org/v2/country?format=json&per_page=400';
@@ -76,20 +76,20 @@ class CountryList extends Component {
           }, function () { });
 
         } else {
-          console.log('Error with fetching country list')
+          console.log('Error with fetching country list');
         }
       }
     }
     catch (error) {
-      console.log(error)
-    };
+      console.log(error);
+    }
   }
 
   render() {
-
     if (this.state.isLoading && this.state.dataSource == null) {
       return (
         <View style={styles.container}>
+          <DisabledButton />
           <Text style={styles.waitingText}>Loading country list</Text>
           <ActivityIndicator />
         </View>
@@ -99,12 +99,7 @@ class CountryList extends Component {
     else if (this.state.isLoading) {
       return (
         <View style={styles.container}>
-          <Button
-            color='rgb(95, 21, 58)'
-            style={styles.selectCountryButton}
-            title="Select country"
-            disabled
-          />
+          <DisabledButton />
           <Text style={styles.waitingText}>Loading country data for: {this.state.countryName} </Text>
           <ActivityIndicator />
         </View>
@@ -114,12 +109,7 @@ class CountryList extends Component {
     else if (this.state.country === null) {
       return (
         <View style={styles.container}>
-          <Button
-            color='rgb(95, 21, 58)'
-            style={styles.selectCountryButton}
-            title="Select country"
-            disabled
-          />
+          <DisabledButton />
           <FlatList
             data={this.state.dataSource}
             renderItem={({ item }) => (
@@ -136,12 +126,7 @@ class CountryList extends Component {
     else if (this.state.countryTimeSeries === null) {
       return (
         <View style={styles.container}>
-          <Button
-            color='rgb(95, 21, 58)'
-            style={styles.selectCountryButton}
-            title="Select country"
-            disabled
-          />
+          <DisabledButton />
           <ActivityIndicator />
         </View>
       )
@@ -154,16 +139,16 @@ class CountryList extends Component {
         fill: 'tozeroy',
         type: 'scatter',
         line: {
-          color: 'rgb(95, 21, 58)'
+          color: graphStyles.graphLineColor
         },
-        fillcolor: 'rgba(95, 21, 58, 0.4)'
+        fillcolor: graphStyles.graphFillColor
       }];
       const layout = { title: 'Population count / ' + this.state.countryName };
 
       return (
         <View style={styles.container}>
           <Button
-            color='rgb(95, 21, 58)'
+            color={styles.selectCountryButton.color}
             title='Select country'
             onPress={() => this.setState({
               isLoading: false,
@@ -179,7 +164,7 @@ class CountryList extends Component {
             config={{ displayModeBar: false }}
           />
         </View>
-      )
+      );
     }
   }
 
@@ -242,6 +227,16 @@ class CountryList extends Component {
       countryTimeSeries: null
     })
   }
+}
+
+function DisabledButton() {
+  return (
+    <Button
+      color={styles.selectCountryButton.color}
+      title="Select country"
+      disabled
+    />
+  );
 }
 
 function sortCountriesAlphabeticallyByName(a, b) {

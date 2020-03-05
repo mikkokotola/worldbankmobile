@@ -1,4 +1,9 @@
 import { StyleSheet } from 'react-native';
+import {Dimensions } from "react-native";
+
+const screenWidth = Math.round(Dimensions.get('window').width);
+const screenHeight = Math.round(Dimensions.get('window').height);
+const minDimension = Math.min(screenWidth, screenHeight);
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -8,27 +13,26 @@ const styles = StyleSheet.create({
         flex: 3,
         width: '100%',
         backgroundColor: 'black',
-        textAlign: 'center'
+        justifyContent: 'center', 
+        alignItems: 'center'
     },
     headerText: {
         fontFamily: 'sans-serif-condensed',
-        alignSelf: 'center',
         color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        padding: 20
+        fontSize: 0.05 * minDimension,
+        fontWeight: 'bold'
     },
     footer: {
         flex: 2,
         width: '100%',
         backgroundColor: 'black',
-        textAlign: 'center'
+        justifyContent: 'center', 
+        alignItems: 'center'
     },
     footerText: {
         fontFamily: 'sans-serif-condensed',
-        alignSelf: 'center',
         color: 'white',
-        padding: 5
+        fontSize: 0.03 * minDimension,
     },
     container: {
         flex: 30,

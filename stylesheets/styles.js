@@ -35,9 +35,13 @@ const styles = StyleSheet.create({
         fontSize: 0.03 * minDimension,
     },
     container: {
-        flex: 30,
-        paddingLeft: 20,
-        paddingRight: 20
+        flex: 30
+    },
+    graphContainer: {
+        flex: 1,
+        marginHorizontal: 0,
+        justifyContent: 'center', 
+        alignItems: 'center'
     },
     waitingText: {
         fontFamily: 'sans-serif-condensed',
@@ -65,7 +69,7 @@ const styles = StyleSheet.create({
     },
     item: {
         fontFamily: 'sans-serif-condensed',
-        padding: 3,
+        paddingLeft: 20,
         fontSize: 16,
         height: 25,
     }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, Button, FlatList, Text, TouchableWithoutFeedback, View } from 'react-native';
-import Plotly from 'react-native-plotly';
+import { Dimensions } from "react-native";
+import { LineChart } from "react-native-chart-kit";
 import { styles, graphStyles } from "./stylesheets/styles"
 
 // World bank API, fetch 400 per page, meaning that we get the whole country list
@@ -50,11 +51,20 @@ class CountryList extends Component {
       country: null,
       countryName: null,
       countryLabels: null,
-      countryTimeSeries: null
+      countryTimeSeries: null,
+      screenHeight: Dimensions.get('screen').height,
+      screenWidth: Dimensions.get('screen').width
     }
   }
 
   async componentDidMount() {
+    Dimensions.addEventListener('change', () => {
+      this.setState({
+        screenHeight: Dimensions.get('screen').height,
+        screenWidth: Dimensions.get('screen').width
+      });
+    });
+
     try {
       var response = await fetch(countryListUrl);
 
@@ -133,18 +143,26 @@ class CountryList extends Component {
     }
 
     else {
-      const data = [{
-        x: this.state.countryLabels,
-        y: this.state.countryTimeSeries,
-        fill: 'tozeroy',
-        type: 'scatter',
-        line: {
-          color: graphStyles.graphLineColor
-        },
-        fillcolor: graphStyles.graphFillColor
-      }];
-      const layout = { title: 'Population count / ' + this.state.countryName };
-
+      const data = {
+        labels: this.state.countryLabels.map(label => keepZeroEndingLabel(label)),
+        datasets: [
+          {
+            data: this.state.countryTimeSeries,
+            color: () => graphStyles.graphLineColor,
+            strokeWidth: 1 // optional
+          }
+        ],
+        legend: ['Population count / ' + this.state.countryName] // optional
+      };
+      const chartConfig = {
+        backgroundGradientFrom: "#1E2923",
+        backgroundGradientFromOpacity: 0,
+        backgroundGradientTo: "#08130D",
+        backgroundGradientToOpacity: 0,
+        color: () => graphStyles.graphLineColor,
+        decimalPlaces: 0,
+        propsForBackgroundLines: { strokeDasharray: '0, 10' },
+      };
       return (
         <View style={styles.container}>
           <Button
@@ -158,11 +176,20 @@ class CountryList extends Component {
               countryTimeSeries: null
             }, function () { })}
           />
-          <Plotly
-            data={data}
-            layout={layout}
-            config={{ displayModeBar: false }}
-          />
+          <View style={styles.graphContainer}>
+            <LineChart
+              data={data}
+              height={0.6 * this.state.screenHeight}
+              width={0.9 * this.state.screenWidth}
+              chartConfig={chartConfig}
+              formatYLabel={formatYLabels}
+              fromZero={true}
+              withDots={false}
+              xAxisInterval={100}
+              yAxisInterval={100}
+            />
+          </View>
+
         </View>
       );
     }
@@ -246,11 +273,41 @@ function sortCountriesAlphabeticallyByName(a, b) {
 }
 
 function getValues(data) {
-  var vals = data[1].sort((a, b) => a.date - b.date).map(item => item.value);
+  var dataSorted = sortAndCropData(data);
+  var vals = dataSorted.map(item => item.value);
+
   return vals;
 }
 
 function getLabels(data) {
-  var labels = data[1].sort((a, b) => a.date - b.date).map(item => item.date);
+  var dataSorted = sortAndCropData(data);
+  var labels = dataSorted.map(item => item.date);
   return labels;
+}
+
+function sortAndCropData(data) {
+  var dataSorted = data[1].sort((a, b) => a.date - b.date);
+  if (dataSorted[dataSorted.length - 1].value == null) {
+    dataSorted = dataSorted.slice(0, dataSorted.length - 1);
+  }
+  return dataSorted;
+}
+
+function keepZeroEndingLabel(label) {
+  if (label.endsWith('0')) {
+    return label
+  } else {
+    return ''
+  }
+}
+
+function formatYLabels(label) {
+  if (label.length > 8) {
+    return (label.substring(0, label.length - 6) + ' M');
+  } else if (label.length > 4) {
+    return (label.substring(0, label.length - 3) + ' k');
+  } else {
+    return label;
+  }
+
 }

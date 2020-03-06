@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ActivityIndicator, Button, FlatList, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import { styles, graphStyles } from "./stylesheets/styles"
 
 // World bank API, fetch 400 per page, meaning that we get the whole country list
@@ -95,7 +96,38 @@ class CountryList extends Component {
     }
   }
 
+  setStateToCountryList() {
+    this.setState({
+      isLoading: false,
+      country: null,
+      countryName: null,
+      countryLabels: null,
+      countryTimeSeries: null
+    });
+  }
+
+  onSwipe(gestureName, gestureState) {
+    const { SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT } = swipeDirections;
+    switch (gestureName) {
+      case SWIPE_UP:
+        break;
+      case SWIPE_DOWN:
+        break;
+      case SWIPE_LEFT:
+        this.setStateToCountryList();
+        break;
+      case SWIPE_RIGHT:
+        this.setStateToCountryList();
+        break;
+    }
+  }
+
   render() {
+    const config = {
+      velocityThreshold: 0.3,
+      directionalOffsetThreshold: 80
+    };
+
     if (this.state.isLoading && this.state.dataSource == null) {
       return (
         <View style={styles.container}>
@@ -164,7 +196,11 @@ class CountryList extends Component {
         propsForBackgroundLines: { strokeDasharray: '0, 10' },
       };
       return (
-        <View style={styles.container}>
+        <GestureRecognizer
+          onSwipe={(direction, state) => this.onSwipe(direction, state)}
+          config={config}
+          style={styles.container}
+        >
           <Button
             color={styles.selectCountryButton.color}
             title='Select country'
@@ -189,8 +225,7 @@ class CountryList extends Component {
               yAxisInterval={100}
             />
           </View>
-
-        </View>
+        </GestureRecognizer>
       );
     }
   }

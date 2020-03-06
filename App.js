@@ -302,10 +302,10 @@ function keepZeroEndingLabel(label) {
 }
 
 function formatYLabels(label) {
-  if (label.length > 8) {
-    return (label.substring(0, label.length - 6) + ' M');
-  } else if (label.length > 4) {
-    return (label.substring(0, label.length - 3) + ' k');
+  if (label.length > 6) {
+    return (label.substring(0, label.length - 6) + ',' + label.substring(label.length - 6, label.length - 5) + ' M');
+  } else if (label.length > 3) {
+    return (label.substring(0, label.length - 3) + ',' + label.substring(label.length - 3, label.length - 2) + ' k');
   } else {
     return label;
   }

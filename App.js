@@ -193,7 +193,7 @@ class CountryList extends Component {
         backgroundGradientToOpacity: 0,
         color: () => graphStyles.graphLineColor,
         decimalPlaces: 0,
-        propsForBackgroundLines: { strokeDasharray: '0, 10' },
+        propsForBackgroundLines: { opacity: 0.2, strokeWidth: 0.5, strokeDasharray: '' },
       };
       return (
         <GestureRecognizer
